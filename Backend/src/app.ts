@@ -3,6 +3,7 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import { env } from "./config/env";
 import { errorHandler } from "./middlewares/error.middleware";
+import authRoutes from "./routes/auth.route"; 
 
 const app = express();
 
@@ -15,6 +16,7 @@ app.get("/api/health", (_req, res) => {
 });
 
 // routes will be mounted here
+app.use("/api/auth", authRoutes);
 
 app.use(errorHandler); // must be last
 
