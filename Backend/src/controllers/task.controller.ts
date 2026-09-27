@@ -20,29 +20,60 @@ import {
  */
 export const getTasks = asyncHandler(async (req: Request, res: Response) => {
   const userId = req.user!.id;
-  const { status, dueDate } = req.query as { status?: string; dueDate?: Date };
+  const { status, dueDate, view, page, limit } = req.query as unknown as {
+    status?: string;
+    dueDate?: Date;
+    view?: "past" | "upcoming";
+    page: number;
+    limit: number;
+  };
 
-  const hasFilters = Boolean(status || dueDate);
+  const isDefaultView = !status && !dueDate && !view && page === 1;
 
-  // Only the unfiltered list is cached, so skip cache entirely when filtering
-  if (!hasFilters) {
+  // Only the default (unfiltered, first-page) view is cached
+  if (isDefaultView) {
     const cached = await getCachedTasks(userId);
     if (cached) {
-      return res.json({ success: true, tasks: cached, source: "cache" });
+      return res.json({ success: true, ...cached, source: "cache" });
     }
   }
 
   const query: Record<string, unknown> = { owner: userId };
   if (status) query.status = status;
-  if (dueDate) query.dueDate = dueDate;
 
-  const tasks = await Task.find(query).sort({ createdAt: -1 });
+  if (dueDate) {
+    // Exact date match takes priority over the "view" range filter
+    query.dueDate = dueDate;
+  } else if (view) {
+    const startOfToday = new Date();
+    startOfToday.setHours(0, 0, 0, 0);
 
-  if (!hasFilters) {
-    await setCachedTasks(userId, tasks);
+    query.dueDate =
+      view === "past" ? { $lt: startOfToday } : { $gte: startOfToday };
   }
 
-  res.json({ success: true, tasks, source: "db" });
+  const skip = (page - 1) * limit;
+
+  // Fetch one extra document to cheaply determine if more pages exist,
+  // without a separate countDocuments() query
+  const tasks = await Task.find(query)
+    .sort({ createdAt: -1 })
+    .skip(skip)
+    .limit(limit + 1);
+
+  const hasMore = tasks.length > limit;
+  const pageTasks = hasMore ? tasks.slice(0, limit) : tasks;
+
+  const responseBody = {
+    tasks: pageTasks,
+    pagination: { page, limit, hasMore },
+  };
+
+  if (isDefaultView) {
+    await setCachedTasks(userId, responseBody);
+  }
+
+  res.json({ success: true, ...responseBody, source: "db" });
 });
 
 /**

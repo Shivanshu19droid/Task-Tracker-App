@@ -21,4 +21,7 @@ export const updateTaskSchema = z
 export const taskQuerySchema = z.object({
   status: z.enum(["pending", "completed"]).optional(),
   dueDate: z.coerce.date().optional(),
+  view: z.enum(["past", "upcoming"]).optional(), // date-range shortcut
+  page: z.coerce.number().int().min(1).default(1),
+  limit: z.coerce.number().int().min(1).max(50).default(16),
 });
