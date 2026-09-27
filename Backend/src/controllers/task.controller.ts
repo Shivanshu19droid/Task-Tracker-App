@@ -20,15 +20,16 @@ import {
  */
 export const getTasks = asyncHandler(async (req: Request, res: Response) => {
   const userId = req.user!.id;
-  const { status, dueDate, view, page, limit } = req.query as unknown as {
+  const { status, dueDate, view, search, page, limit } = req.query as unknown as {
     status?: string;
     dueDate?: Date;
     view?: "past" | "upcoming";
+    search?: string;
     page: number;
     limit: number;
   };
 
-  const isDefaultView = !status && !dueDate && !view && page === 1;
+  const isDefaultView = !status && !dueDate && !view && !search && page === 1;
 
   // Only the default (unfiltered, first-page) view is cached
   if (isDefaultView) {
@@ -50,6 +51,14 @@ export const getTasks = asyncHandler(async (req: Request, res: Response) => {
 
     query.dueDate =
       view === "past" ? { $lt: startOfToday } : { $gte: startOfToday };
+  }
+
+  if (search) {
+    // Case-insensitive substring match — "fuzzy" in the sense of partial,
+    // not typo-tolerant. Escape regex special characters so a title like
+    // "C++ notes" or "3.5 hrs" doesn't break or behave unexpectedly.
+    const escaped = search.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    query.title = { $regex: escaped, $options: "i" };
   }
 
   const skip = (page - 1) * limit;
