@@ -8,7 +8,7 @@ interface TaskListProps {
   loading: boolean;
   onDelete: (id: string) => void;
   onMarkDone: (id: string) => void;
-  onUndo?: (id: string) => void;
+  onUpdate: (id: string) => void;
 }
 
 export default function TaskList({
@@ -16,7 +16,7 @@ export default function TaskList({
   loading,
   onDelete,
   onMarkDone,
-  onUndo,
+  onUpdate
 }: TaskListProps) {
   if (loading && tasks.length === 0) {
     // Only show a full loading state on the very first fetch.
@@ -29,15 +29,15 @@ export default function TaskList({
     return <p className="text-gray-500">No tasks yet. Create one to get started.</p>;
   }
 
-  return (
-    <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+    return (
+    <ul className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
       {tasks.map((task) => (
         <li key={task._id}>
           <TaskCard
             task={task}
             onDelete={onDelete}
             onMarkDone={onMarkDone}
-            onUndo={onUndo}
+            onUpdate={onUpdate}
           />
         </li>
       ))}

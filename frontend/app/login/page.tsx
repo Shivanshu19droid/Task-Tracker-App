@@ -13,6 +13,21 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [usingTestAccount, setUsingTestAccount] = useState(false);
+
+  function handleToggleTestAccount() {
+    const nextState = !usingTestAccount;
+    setUsingTestAccount(nextState);
+
+    if (nextState) {
+      setEmail("shivanshu@gmail.com");
+      setPassword("qwertyui");
+    } else {
+      setEmail("");
+      setPassword("");
+    }
+  }
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -29,53 +44,100 @@ export default function LoginPage() {
     }
   }
 
-  return (
-    <main className="flex min-h-screen items-center justify-center p-4">
-      <form
-        onSubmit={handleSubmit}
-        className="w-full max-w-sm space-y-4 rounded-lg border p-6"
-      >
-        <h1 className="text-xl font-semibold">Log in</h1>
-
-        {error && <p className="text-sm text-red-600">{error}</p>}
-
-        <div>
-          <label className="block text-sm font-medium">Email</label>
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            className="mt-1 w-full rounded border px-3 py-2"
-          />
+    return (
+    <main className="flex min-h-screen items-center justify-center bg-gradient-to-br from-indigo-50 via-white to-violet-100 p-4">
+      <div className="w-full max-w-md">
+        <div className="mb-6 flex flex-col items-center text-center">
+          <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-indigo-600 text-white shadow-lg shadow-indigo-200">
+            <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M5 13l4 4L19 7" />
+            </svg>
+          </div>
+          <h1 className="text-2xl font-bold text-slate-900">Welcome back</h1>
+          <p className="mt-1 text-sm text-slate-500">Log in to access your tasks</p>
         </div>
 
-        <div>
-          <label className="block text-sm font-medium">Password</label>
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            className="mt-1 w-full rounded border px-3 py-2"
-          />
-        </div>
-
-        <button
-          type="submit"
-          disabled={submitting}
-          className="w-full rounded bg-black px-4 py-2 text-white disabled:opacity-50"
+        <form
+          onSubmit={handleSubmit}
+          className="relative space-y-4 rounded-2xl border border-slate-200 bg-white p-6 pt-12 shadow-xl shadow-slate-200/60"
         >
-          {submitting ? "Logging in..." : "Log in"}
-        </button>
+          {/* Test Account Button in Upper Right Corner */}
+          <button
+            type="button"
+            onClick={handleToggleTestAccount}
+            className="absolute right-6 top-6 rounded-lg bg-indigo-50 px-2.5 py-1 text-xs font-semibold text-indigo-600 transition hover:bg-indigo-100"
+          >
+            {usingTestAccount ? "Use Your Own Account" : "Use Test Account"}
+          </button>
 
-        <p className="text-sm text-gray-600">
-          Don&apos;t have an account?{" "}
-          <Link href="/signup" className="underline">
-            Sign up
-          </Link>
-        </p>
-      </form>
+          {error && (
+            <p className="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700">
+              {error}
+            </p>
+          )}
+
+          <div>
+            <label className="block text-sm font-medium text-slate-700">Email</label>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              placeholder="you@example.com"
+              className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 placeholder-slate-400 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-slate-700">Password</label>
+            <div className="relative mt-1">
+              <input
+                type={showPassword ? "text" : "password"}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                placeholder="••••••••"
+                className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 pr-10 text-sm text-slate-900 placeholder-slate-400 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                aria-label={showPassword ? "Hide password" : "Show password"}
+                className="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400 hover:text-slate-600 transition"
+              >
+                {showPassword ? (
+                  // Eye Off Icon
+                  <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
+                    <line x1="1" y1="1" x2="23" y2="23" />
+                  </svg>
+                ) : (
+                  // Eye On Icon
+                  <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                    <circle cx="12" cy="12" r="3" />
+                  </svg>
+                )}
+              </button>
+            </div>
+          </div>
+
+          <button
+            type="submit"
+            disabled={submitting}
+            className="w-full rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-700 disabled:opacity-60"
+          >
+            {submitting ? "Logging in..." : "Log in"}
+          </button>
+
+          <p className="border-t border-slate-100 pt-4 text-center text-sm text-slate-600">
+            Don&apos;t have an account?{" "}
+            <Link href="/signup" className="font-semibold text-indigo-600 hover:text-indigo-700 hover:underline">
+              Sign up
+            </Link>
+          </p>
+        </form>
+      </div>
     </main>
   );
 }
