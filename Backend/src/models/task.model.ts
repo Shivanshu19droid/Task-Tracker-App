@@ -35,6 +35,7 @@ const taskSchema = new Schema<ITask>(
     },
     dueDate: {
       type: Date,
+      required: [true, "DueDate is required"]
     },
     owner: {
       type: Schema.Types.ObjectId,

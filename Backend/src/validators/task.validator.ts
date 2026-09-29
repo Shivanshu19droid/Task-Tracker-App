@@ -4,7 +4,7 @@ export const createTaskSchema = z.object({
   title: z.string().trim().min(1, "Title is required").max(100),
   description: z.string().trim().max(500).optional(),
   status: z.enum(["pending", "completed"]).optional(),
-  dueDate: z.coerce.date().optional(),
+  dueDate: z.coerce.date(),
 });
 
 export const updateTaskSchema = z
